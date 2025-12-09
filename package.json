@@ -4,7 +4,7 @@
   "dependencies": {
     "axios": "1.13.2"
   },
-  "description": "Stedi SDK JS",
+  "description": "NexHealth SDK JS - TypeScript SDK for NexHealth APIs",
   "devDependencies": {
     "@jest/globals": "30.2.0",
     "@swc/jest": "0.2.39",
@@ -25,13 +25,13 @@
   ],
   "license": "MIT",
   "main": "dist/index.js",
-  "name": "@fincuratech/stedi-sdk-js",
+  "name": "@fincuratech/nexhealth-sdk-js",
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fincura-ai/stedi-sdk-js.git"
+    "url": "git+https://github.com/fincura-ai/nexhealth-sdk-js.git"
   },
   "scripts": {
     "build": "tsc --incremental",

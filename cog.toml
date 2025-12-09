@@ -34,5 +34,5 @@ authors = [
 owner = "fincura-ai"
 path = "CHANGELOG.md"
 remote = "github.com"
-repository = "stedi-sdk-js"
+repository = "nexhealth-sdk-js"
 template = "remote"

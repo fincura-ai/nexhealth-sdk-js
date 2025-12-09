@@ -1,46 +1,73 @@
 import axios, { AxiosError, type AxiosRequestConfig, type Method } from 'axios';
 
 import { getLogger } from './logger.js';
+import { type NexHealthAuthResponse } from './types.js';
 
 /**
- * Create a client for the Stedi API.
+ * Create a client for the NexHealth API.
  *
- * @returns The Stedi client.
+ * @param apiKey - The NexHealth API key
+ * @returns The NexHealth client.
  */
-export const stediClient = (apiKey: string) => {
-  const defaultHeaders = {
-    headers: {
-      Authorization: apiKey,
-      'Content-Type': 'application/json',
-    },
-  };
+export const nexhealthClient = (apiKey: string) => {
+  let bearerToken: string | null = null;
+  let tokenExpiresAt: number | null = null;
 
   /**
-   * Download a file from the Stedi API.
-   *
-   * @param url - The URL to download the file from.
-   * @returns The file content.
+   * Get default headers for API requests.
+   * Uses bearer token if authenticated, otherwise uses API key.
    */
-  const downloadFile = async (url: string): Promise<string> => {
-    // Validate that the URL is from stedi.com or its subdomains
-    const stediUrlRegex = /^https:\/\/(?:[\dA-Za-z-]+\.)*stedi\.com\/.*/u;
-    if (!stediUrlRegex.test(url)) {
-      throw new Error(
-        'Invalid URL: The URL must be from the Stedi API (stedi.com or its subdomains)',
-      );
-    }
+  const getHeaders = (useApiKey = false) => ({
+    Accept: 'application/vnd.Nexhealth+json;version=2',
+    Authorization: useApiKey ? apiKey : `Bearer ${bearerToken}`,
+    'Content-Type': 'application/json',
+  });
+
+  /**
+   * Authenticate with the NexHealth API and obtain a bearer token.
+   * The token is valid for 1 hour.
+   *
+   * @see https://docs.nexhealth.com/reference/authentication-1
+   * @returns The bearer token
+   */
+  const authenticate = async (baseUrl: string): Promise<string> => {
+    const log = getLogger();
 
     try {
-      const response = await axios.get(url, {
-        ...defaultHeaders,
-        responseType: 'arraybuffer',
+      log.debug('NexHealth API authentication request');
+
+      const response = await axios.request<NexHealthAuthResponse>({
+        headers: getHeaders(true), // Use API key for auth
+        method: 'POST',
+        url: `${baseUrl}/authenticates`,
       });
-      // Convert buffer to string if it's a buffer
-      if (Buffer.isBuffer(response.data)) {
-        return response.data.toString('utf8');
+
+      log.debug('NexHealth API authentication response', {
+        status: response.status,
+      });
+
+      if (!response.data.code || !response.data.data?.token) {
+        throw new Error('Authentication failed: No token received');
       }
 
-      return response.data;
+      bearerToken = response.data.data.token;
+
+      // Parse JWT to get expiration time (tokens are valid for 1 hour)
+      // JWT format: header.payload.signature
+      const payloadBase64 = bearerToken.split('.')[1];
+      if (payloadBase64) {
+        try {
+          const payload = JSON.parse(
+            Buffer.from(payloadBase64, 'base64').toString('utf8'),
+          );
+          tokenExpiresAt = payload.exp * 1_000; // Convert to milliseconds
+        } catch {
+          // If we can't parse the token, set expiration to 55 minutes from now
+          tokenExpiresAt = Date.now() + 55 * 60 * 1_000;
+        }
+      }
+
+      return bearerToken;
     } catch (error) {
       if (error instanceof AxiosError) {
         delete error.config;
@@ -48,9 +75,9 @@ export const stediClient = (apiKey: string) => {
         delete error.response?.request;
 
         throw new Error(
-          `Request to Stedi API failed: ${
-            error.response?.data.message ||
-            error.response?.data.detail ||
+          `NexHealth authentication failed: ${
+            error.response?.data?.description ||
+            error.response?.data?.error?.[0] ||
             error.message
           }`,
           { cause: error },
@@ -62,7 +89,33 @@ export const stediClient = (apiKey: string) => {
   };
 
   /**
-   * Execute a request to the Stedi API.
+   * Check if the current token is valid and not expired.
+   */
+  const isAuthenticated = (): boolean => {
+    if (!bearerToken || !tokenExpiresAt) {
+      return false;
+    }
+
+    // Add 1 minute buffer before expiration
+    return Date.now() < tokenExpiresAt - 60 * 1_000;
+  };
+
+  /**
+   * Get the current bearer token.
+   */
+  const getToken = (): string | null => bearerToken;
+
+  /**
+   * Clear the current authentication state.
+   */
+  const clearAuth = (): void => {
+    bearerToken = null;
+    tokenExpiresAt = null;
+  };
+
+  /**
+   * Execute a request to the NexHealth API.
+   * Requires authentication before making requests.
    *
    * @param baseUrl - The base URL to use.
    * @param method - The HTTP method to use.
@@ -78,20 +131,26 @@ export const stediClient = (apiKey: string) => {
   ): Promise<T> => {
     const log = getLogger();
 
+    if (!isAuthenticated()) {
+      throw new Error(
+        'Not authenticated. Call authenticate() before making API requests.',
+      );
+    }
+
     try {
-      log.debug('Stedi API request', { config, method, path });
+      log.debug('NexHealth API request', { config, method, path });
 
       const response = await axios.request<T>({
         ...config,
         headers: {
-          ...defaultHeaders.headers,
+          ...getHeaders(),
           ...config?.headers,
         },
         method,
         url: `${baseUrl}/${path.replace(/^\//u, '')}`,
       });
 
-      log.debug('Stedi API response', {
+      log.debug('NexHealth API response', {
         data: response.data,
         status: response.status,
       });
@@ -104,9 +163,9 @@ export const stediClient = (apiKey: string) => {
         delete error.response?.request;
 
         throw new Error(
-          `Request to Stedi API failed: ${
-            error.response?.data.message ||
-            error.response?.data.detail ||
+          `Request to NexHealth API failed: ${
+            error.response?.data?.description ||
+            error.response?.data?.error?.[0] ||
             error.message
           }`,
           { cause: error },
@@ -118,9 +177,12 @@ export const stediClient = (apiKey: string) => {
   };
 
   return {
-    downloadFile,
+    authenticate,
+    clearAuth,
+    getToken,
+    isAuthenticated,
     request,
   };
 };
 
-export type StediClient = ReturnType<typeof stediClient>;
+export type NexHealthCoreClient = ReturnType<typeof nexhealthClient>;

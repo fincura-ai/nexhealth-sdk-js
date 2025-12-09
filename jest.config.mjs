@@ -1,7 +1,7 @@
 /** @type {import('jest').Config} */
 
 const config = {
-  displayName: 'stedi-sdk-js',
+  displayName: 'nexhealth-sdk-js',
 
   extensionsToTreatAsEsm: ['.ts'],
 

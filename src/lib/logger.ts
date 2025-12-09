@@ -1,5 +1,5 @@
 /**
- * Logger interface for the Stedi SDK.
+ * Logger interface for the NexHealth SDK.
  * Consumers can implement this interface to integrate their own logging solutions.
  */
 export type Logger = {
@@ -68,7 +68,7 @@ const formatMeta = (meta?: Record<string, unknown>): string =>
 
 /**
  * Creates a console-based logger for development and debugging.
- * All logs are prefixed with [stedi-sdk] for easy identification.
+ * All logs are prefixed with [nexhealth-sdk] for easy identification.
  *
  * @param minLevel - The minimum log level to output (default: 'info')
  * @returns A logger that outputs to the console
@@ -84,28 +84,28 @@ export const createConsoleLogger = (
       if (levels.debug >= minLevelValue) {
         const metaStr = formatMeta(meta);
         // eslint-disable-next-line no-console
-        console.debug(`[stedi-sdk] DEBUG: ${message}`, metaStr);
+        console.debug(`[nexhealth-sdk] DEBUG: ${message}`, metaStr);
       }
     },
     error: (message, meta) => {
       if (levels.error >= minLevelValue) {
         const metaStr = formatMeta(meta);
         // eslint-disable-next-line no-console
-        console.error(`[stedi-sdk] ERROR: ${message}`, metaStr);
+        console.error(`[nexhealth-sdk] ERROR: ${message}`, metaStr);
       }
     },
     info: (message, meta) => {
       if (levels.info >= minLevelValue) {
         const metaStr = formatMeta(meta);
         // eslint-disable-next-line no-console
-        console.info(`[stedi-sdk] INFO: ${message}`, metaStr);
+        console.info(`[nexhealth-sdk] INFO: ${message}`, metaStr);
       }
     },
     warn: (message, meta) => {
       if (levels.warn >= minLevelValue) {
         const metaStr = formatMeta(meta);
         // eslint-disable-next-line no-console
-        console.warn(`[stedi-sdk] WARN: ${message}`, metaStr);
+        console.warn(`[nexhealth-sdk] WARN: ${message}`, metaStr);
       }
     },
   };
@@ -122,14 +122,14 @@ let logger: Logger = createNoOpLogger();
  * @param customLogger - A logger implementation conforming to the Logger interface
  * @example
  *   ```typescript
- *   import { setLogger, createConsoleLogger } from '@fincuratech/stedi-sdk-js';
+ *   import { setLogger, createConsoleLogger } from '@fincuratech/nexhealth-sdk-js';
  *
  *   // Enable console logging for debugging
  *   setLogger(createConsoleLogger('debug'));
  *   ```
  * @example
  *   ```typescript
- *   import { setLogger } from '@fincuratech/stedi-sdk-js';
+ *   import { setLogger } from '@fincuratech/nexhealth-sdk-js';
  *   import winston from 'winston';
  *
  *   const winstonLogger = winston.createLogger({
