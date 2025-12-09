@@ -112,7 +112,7 @@ export type NexHealthPatientsQueryParams = {
    */
   last_name?: string;
   /**
-   * Required: Location ID to filter patients
+   * Required: Used to scope the request to the specified location
    */
   location_id: number;
   /**
@@ -139,6 +139,10 @@ export type NexHealthPatientsQueryParams = {
    * Return patients updated since this timestamp
    */
   since?: string;
+  /**
+   * Required Used to scope the request to the specified institution
+   */
+  subdomain: string;
 };
 
 /**
