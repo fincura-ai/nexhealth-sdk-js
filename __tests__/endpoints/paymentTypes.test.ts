@@ -1,4 +1,4 @@
-import { patients } from '../../src/endpoints/patients.js';
+import { paymentTypes } from '../../src/endpoints/paymentTypes.js';
 import { type NexHealthCoreClient } from '../../src/lib/client.js';
 
 const createMockClient = (): jest.Mocked<NexHealthCoreClient> => ({
@@ -9,26 +9,26 @@ const createMockClient = (): jest.Mocked<NexHealthCoreClient> => ({
   request: jest.fn(),
 });
 
-describe('patients endpoint', () => {
+describe('paymentTypes endpoint', () => {
   const testBaseUrl = 'https://nexhealth.info';
   let mockClient: jest.Mocked<NexHealthCoreClient>;
-  let patientsEndpoint: ReturnType<typeof patients>;
+  let paymentTypesEndpoint: ReturnType<typeof paymentTypes>;
 
   beforeEach(() => {
     mockClient = createMockClient();
-    patientsEndpoint = patients(mockClient, testBaseUrl);
+    paymentTypesEndpoint = paymentTypes(mockClient, testBaseUrl);
   });
 
   describe('list', () => {
-    it('should return patients from wrapped response', async () => {
-      const mockPatients = [{ id: 1 }, { id: 2 }];
+    it('should return payment types from API', async () => {
+      const mockTypes = [{ active: true, id: 1, name: 'Cash' }];
       mockClient.request.mockResolvedValue({
         code: true,
-        data: { patients: mockPatients },
+        data: mockTypes,
         error: [],
       });
 
-      const result = await patientsEndpoint.list({
+      const result = await paymentTypesEndpoint.list({
         location_id: 123,
         subdomain: 'test-practice',
       });
@@ -36,36 +36,20 @@ describe('patients endpoint', () => {
       expect(mockClient.request).toHaveBeenCalledWith(
         testBaseUrl,
         'GET',
-        '/patients',
+        '/payment_types',
         { params: { location_id: 123, subdomain: 'test-practice' } },
       );
-      expect(result).toEqual(mockPatients);
+      expect(result).toEqual(mockTypes);
     });
 
-    it('should return patients from array response', async () => {
-      const mockPatients = [{ id: 1 }];
-      mockClient.request.mockResolvedValue({
-        code: true,
-        data: mockPatients,
-        error: [],
-      });
-
-      const result = await patientsEndpoint.list({
-        location_id: 123,
-        subdomain: 'test-practice',
-      });
-
-      expect(result).toEqual(mockPatients);
-    });
-
-    it('should return empty array for unexpected response', async () => {
+    it('should return empty array for non-array response', async () => {
       mockClient.request.mockResolvedValue({
         code: true,
         data: null,
         error: [],
       });
 
-      const result = await patientsEndpoint.list({
+      const result = await paymentTypesEndpoint.list({
         location_id: 123,
         subdomain: 'test-practice',
       });
