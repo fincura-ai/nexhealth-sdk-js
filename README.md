@@ -59,140 +59,318 @@ import { createNexHealthClient } from '@fincuratech/nexhealth-sdk-js';
 // Initialize the client with your NexHealth API key
 const nexhealth = createNexHealthClient('your-nexhealth-api-key');
 
-// Use the client to interact with NexHealth APIs
-// Endpoints will be documented as they are implemented
+// Authenticate first (required before making other API calls)
+await nexhealth.authenticate();
+
+// Example: List patients for a location
+const patients = await nexhealth.patients.list({
+  location_id: 123,
+  subdomain: 'my-practice',
+});
 ```
 
 ## API Reference
 
-API endpoints are being implemented. See the [NexHealth API Documentation](https://docs.nexhealth.com/reference/introduction) for available endpoints.
+### Authentication
+
+#### `authenticate()`
+
+Authenticate with the NexHealth API. Must be called before making any other API requests. The bearer token is valid for 1 hour.
+
+```typescript
+await nexhealth.authenticate();
+```
+
+**Additional methods:**
+
+- `isAuthenticated()` - Check if authenticated
+- `getToken()` - Get current token (or null)
+- `clearAuth()` - Clear authentication
+
+📖 [Authentication Documentation](https://docs.nexhealth.com/reference/authentication-1)
+
+---
+
+### Patients
+
+#### `patients.list(params)`
+
+Retrieve patients for a location.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `location_id` | number | ✓ | Location ID |
+| `subdomain` | string | ✓ | Institution subdomain |
+| `id` | number | | Filter by patient ID |
+| `first_name` | string | | Filter by first name |
+| `last_name` | string | | Filter by last name |
+| `email` | string | | Filter by email |
+| `phone_number` | string | | Filter by phone |
+| `date_of_birth` | string | | Filter by DOB (YYYY-MM-DD) |
+| `new_patient` | boolean | | Filter new patients |
+| `inactive` | boolean | | Filter inactive patients |
+| `since` | string | | Updated since timestamp |
+| `page` | number | | Page number |
+| `per_page` | number | | Results per page |
+
+**Returns:** `Promise<NexHealthPatient[]>`
+
+```typescript
+const patients = await nexhealth.patients.list({
+  location_id: 123,
+  subdomain: 'my-practice',
+});
+
+// With filters
+const filtered = await nexhealth.patients.list({
+  location_id: 123,
+  subdomain: 'my-practice',
+  first_name: 'John',
+  last_name: 'Doe',
+});
+```
+
+📖 [Patients API Documentation](https://docs.nexhealth.com/reference/getpatients)
+
+---
+
+### Charges
+
+> [!NOTE]
+> Only supported for Dentrix, Dentrix Enterprise, Eaglesoft, and Open Dental.
+
+#### `charges.list(params)`
+
+Retrieve charges for a location.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `location_id` | number | ✓ | Location ID |
+| `subdomain` | string | ✓ | Institution subdomain |
+| `patient_id` | number | | Filter by patient ID |
+| `provider_id` | number | | Filter by provider ID |
+| `guarantor_id` | number | | Filter by guarantor ID |
+| `procedure` | string | | Filter by procedure code |
+| `updated_since` | string | | Updated since timestamp |
+| `page` | number | | Page number |
+| `per_page` | number | | Results per page |
+
+**Returns:** `Promise<NexHealthCharge[]>`
+
+```typescript
+const charges = await nexhealth.charges.list({
+  location_id: 123,
+  subdomain: 'my-practice',
+  patient_id: 456,
+});
+```
+
+📖 [Charges API Documentation](https://docs.nexhealth.com/v20240412/reference/getcharges)
+
+---
+
+### Claims
+
+> [!NOTE]
+> Only supported for Dentrix, Dentrix Enterprise, Eaglesoft, and Open Dental.
+
+#### `claims.list(params)`
+
+Retrieve insurance claims for a location.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `location_id` | number | ✓ | Location ID |
+| `subdomain` | string | ✓ | Institution subdomain |
+| `patient_id` | number | | Filter by patient ID |
+| `provider_id` | number | | Filter by provider ID |
+| `guarantor_id` | number | | Filter by guarantor ID |
+| `updated_since` | string | | Updated since timestamp |
+| `page` | number | | Page number |
+| `per_page` | number | | Results per page |
+
+**Returns:** `Promise<NexHealthClaim[]>`
+
+```typescript
+const claims = await nexhealth.claims.list({
+  location_id: 123,
+  subdomain: 'my-practice',
+  patient_id: 456,
+});
+```
+
+📖 [Claims API Documentation](https://docs.nexhealth.com/v20240412/reference/getclaims)
+
+---
+
+### Payments
+
+> [!NOTE]
+> Only supported for Dentrix, Dentrix Enterprise, Eaglesoft, and Open Dental.
+
+#### `payments.create(params, body)`
+
+Create a payment in the EHR.
+
+**Query Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `location_id` | number | ✓ | Location ID |
+| `subdomain` | string | ✓ | Institution subdomain |
+
+**Body Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `patient_id` | number | ✓ | Patient ID |
+| `amount` | number | ✓ | Amount (negative for received) |
+| `payment_type_id` | number | * | Payment type ID |
+| `type_name` | string | * | Payment type name |
+| `transaction_id` | string | | Unique ID for idempotency |
+| `paid_at` | string | | ISO 8601 payment timestamp |
+| `charge_splits` | object | | Split across charges |
+| `provider_splits` | object | | Split across providers |
+| `notes` | string | | Payment notes |
+| `currency` | string | | Currency (default: USD) |
+
+\* Either `payment_type_id` or `type_name` must be provided.
+
+**Returns:** `Promise<NexHealthPayment>`
+
+```typescript
+const payment = await nexhealth.payments.create(
+  { location_id: 123, subdomain: 'my-practice' },
+  {
+    patient_id: 456,
+    amount: -100,
+    payment_type_id: 10,
+    transaction_id: 'API:payment-001',
+  }
+);
+
+// With charge splits
+const payment = await nexhealth.payments.create(
+  { location_id: 123, subdomain: 'my-practice' },
+  {
+    patient_id: 456,
+    amount: -138,
+    payment_type_id: 10,
+    charge_splits: { '789': -100, '790': -38 },
+  }
+);
+```
+
+📖 [Payments API Documentation](https://docs.nexhealth.com/v20240412/reference/postpayments)
+
+---
+
+### Payment Types
+
+> [!NOTE]
+> Only supported for Dentrix, Dentrix Enterprise, Eaglesoft, and Open Dental.
+
+#### `paymentTypes.list(params)`
+
+List payment types for a location.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `location_id` | number | ✓ | Location ID |
+| `subdomain` | string | ✓ | Institution subdomain |
+
+**Returns:** `Promise<NexHealthPaymentType[]>`
+
+```typescript
+const types = await nexhealth.paymentTypes.list({
+  location_id: 123,
+  subdomain: 'my-practice',
+});
+
+const creditCard = types.find((t) => t.name === 'Credit Card');
+```
+
+📖 [Payment Types API Documentation](https://docs.nexhealth.com/v20240412/reference/getpaymenttypes)
 
 ## TypeScript Support
 
 This SDK is written in TypeScript and provides full type definitions.
 
-### Type-Safe Usage
+### Available Types
 
 ```typescript
-import { createNexHealthClient } from '@fincuratech/nexhealth-sdk-js';
-
-const nexhealth = createNexHealthClient(process.env.NEXHEALTH_API_KEY!);
-
-// TypeScript provides full intellisense and type checking
+import type {
+  // Client
+  NexHealthClient,
+  
+  // Patients
+  NexHealthPatient,
+  NexHealthPatientBio,
+  NexHealthPatientsQueryParams,
+  
+  // Charges
+  NexHealthCharge,
+  NexHealthChargesQueryParams,
+  
+  // Claims
+  NexHealthClaim,
+  NexHealthClaimTotals,
+  NexHealthClaimsQueryParams,
+  
+  // Payments
+  NexHealthPayment,
+  NexHealthPaymentCreateBody,
+  NexHealthPaymentCreateParams,
+  NexHealthChargeSplits,
+  NexHealthProviderSplits,
+  
+  // Payment Types
+  NexHealthPaymentType,
+  NexHealthPaymentTypesQueryParams,
+  
+  // Common
+  NexHealthMoneyAmount,
+  NexHealthApiResponse,
+} from '@fincuratech/nexhealth-sdk-js';
 ```
 
 ## Logging
 
-The SDK is **silent by default** in production to avoid cluttering your application logs. However, you can enable logging for debugging or integrate your own logging solution.
-
-### Default Behavior
-
-By default, the SDK uses a no-op logger that doesn't output anything:
-
-```typescript
-import { createNexHealthClient } from '@fincuratech/nexhealth-sdk-js';
-
-const nexhealth = createNexHealthClient('your-api-key');
-// No logging output - silent by default
-```
-
-### Enable Console Logging
-
-For development and debugging, you can enable console logging:
+The SDK is **silent by default**. Enable logging for debugging:
 
 ```typescript
 import { createNexHealthClient, setLogger, createConsoleLogger } from '@fincuratech/nexhealth-sdk-js';
 
-// Enable console logging at 'debug' level
 setLogger(createConsoleLogger('debug'));
 
 const nexhealth = createNexHealthClient('your-api-key');
-
-// Now you'll see debug logs in the console:
-// [nexhealth-sdk] DEBUG: NexHealth API request { method: 'GET', path: '/patients', ... }
-// [nexhealth-sdk] DEBUG: NexHealth API response { status: 200, ... }
 ```
 
-Available log levels (from most to least verbose):
-- `'debug'` - Shows all logs including request/response details
-- `'info'` - Shows informational messages
-- `'warn'` - Shows warnings only
-- `'error'` - Shows errors only
+Available log levels: `'debug'` | `'info'` | `'warn'` | `'error'`
 
-### Custom Logger Integration
+### Custom Logger
 
-You can integrate any logging framework (Winston, Pino, Bunyan, etc.) by implementing the `Logger` interface:
-
-#### Winston Example
+Integrate any logging framework by implementing the `Logger` interface:
 
 ```typescript
-import { createNexHealthClient, setLogger, type Logger } from '@fincuratech/nexhealth-sdk-js';
-import winston from 'winston';
+import { setLogger, type Logger } from '@fincuratech/nexhealth-sdk-js';
 
-// Create your Winston logger
-const winstonLogger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'nexhealth-sdk.log' }),
-  ],
-});
-
-// Adapt Winston to the Logger interface
-const nexhealthLogger: Logger = {
-  debug: (message, meta) => winstonLogger.debug(message, meta),
-  info: (message, meta) => winstonLogger.info(message, meta),
-  warn: (message, meta) => winstonLogger.warn(message, meta),
-  error: (message, meta) => winstonLogger.error(message, meta),
+const customLogger: Logger = {
+  debug: (message, meta) => { /* ... */ },
+  info: (message, meta) => { /* ... */ },
+  warn: (message, meta) => { /* ... */ },
+  error: (message, meta) => { /* ... */ },
 };
 
-// Set the custom logger
-setLogger(nexhealthLogger);
-
-const nexhealth = createNexHealthClient('your-api-key');
-// All SDK logs now go through Winston
-```
-
-#### Pino Example
-
-```typescript
-import { createNexHealthClient, setLogger, type Logger } from '@fincuratech/nexhealth-sdk-js';
-import pino from 'pino';
-
-const pinoLogger = pino({
-  level: 'debug',
-  transport: {
-    target: 'pino-pretty',
-  },
-});
-
-const nexhealthLogger: Logger = {
-  debug: (message, meta) => pinoLogger.debug(meta, message),
-  info: (message, meta) => pinoLogger.info(meta, message),
-  warn: (message, meta) => pinoLogger.warn(meta, message),
-  error: (message, meta) => pinoLogger.error(meta, message),
-};
-
-setLogger(nexhealthLogger);
-
-const nexhealth = createNexHealthClient('your-api-key');
-```
-
-### Logger Interface
-
-The SDK defines a simple logger interface that any logging solution can implement:
-
-```typescript
-interface Logger {
-  debug(message: string, meta?: Record<string, unknown>): void;
-  info(message: string, meta?: Record<string, unknown>): void;
-  warn(message: string, meta?: Record<string, unknown>): void;
-  error(message: string, meta?: Record<string, unknown>): void;
-}
+setLogger(customLogger);
 ```
 
 ## Contributing
@@ -201,31 +379,12 @@ Contributions are welcome. Please follow these guidelines:
 
 ### Development Setup
 
-**Use pnpm** - npm has issues with platform-specific native bindings (especially on macOS). Install pnpm globally:
+**Use pnpm** - npm has issues with platform-specific native bindings (especially on macOS).
 
 ```bash
-npm install -g pnpm
-# or with Corepack (Node.js 16.9+)
-corepack enable
-```
-
-Then:
-
-```bash
-# Clone
-git clone https://github.com/fincura-ai/nexhealth-sdk-js.git
-cd nexhealth-sdk-js
-
-# Install dependencies
 pnpm install
-
-# Run tests
 pnpm test
-
-# Run linter
 pnpm run lint
-
-# Build
 pnpm run build
 ```
 
@@ -236,19 +395,6 @@ pnpm run build
 - Update documentation for API changes
 - Ensure all tests pass before submitting PRs
 - Use conventional commit messages
-
-### Testing
-
-```bash
-# Run all tests
-pnpm test
-
-# Run tests in watch mode
-pnpm test -- --watch
-
-# Run tests with coverage
-pnpm test -- --coverage
-```
 
 ## License
 
