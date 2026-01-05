@@ -18,9 +18,10 @@ export const nexhealthClient = (apiKey: string) => {
    * Uses bearer token if authenticated, otherwise uses API key.
    */
   const getHeaders = (useApiKey = false) => ({
-    Accept: 'application/vnd.Nexhealth+json;version=2',
+    Accept: 'application/json',
     Authorization: useApiKey ? apiKey : `Bearer ${bearerToken}`,
     'Content-Type': 'application/json',
+    'Nex-Api-Version': 'v20240412',
   });
 
   /**
@@ -78,7 +79,8 @@ export const nexhealthClient = (apiKey: string) => {
           `NexHealth authentication failed: ${
             error.response?.data?.description ||
             error.response?.data?.error?.[0] ||
-            error.message
+            error.message ||
+            'Unknown error'
           }`,
           { cause: error },
         );
@@ -166,7 +168,8 @@ export const nexhealthClient = (apiKey: string) => {
           `Request to NexHealth API failed: ${
             error.response?.data?.description ||
             error.response?.data?.error?.[0] ||
-            error.message
+            error.message ||
+            'Unknown error'
           }`,
           { cause: error },
         );

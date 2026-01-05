@@ -1,4 +1,4 @@
-import { patients } from '../../src/endpoints/patients.js';
+import { claims } from '../../src/endpoints/claims.js';
 import { type NexHealthCoreClient } from '../../src/lib/client.js';
 
 const createMockClient = (): jest.Mocked<NexHealthCoreClient> => ({
@@ -9,53 +9,61 @@ const createMockClient = (): jest.Mocked<NexHealthCoreClient> => ({
   request: jest.fn(),
 });
 
-describe('patients endpoint', () => {
+describe('claims endpoint', () => {
   const testBaseUrl = 'https://nexhealth.info';
   let mockClient: jest.Mocked<NexHealthCoreClient>;
-  let patientsEndpoint: ReturnType<typeof patients>;
+  let claimsEndpoint: ReturnType<typeof claims>;
 
   beforeEach(() => {
     mockClient = createMockClient();
-    patientsEndpoint = patients(mockClient, testBaseUrl);
+    claimsEndpoint = claims(mockClient, testBaseUrl);
   });
 
   describe('list', () => {
-    it('should return patients from wrapped response', async () => {
-      const mockPatients = [{ id: 1 }, { id: 2 }];
+    it('should return claims from wrapped response', async () => {
+      const mockClaims = [{ id: 1 }, { id: 2 }];
       mockClient.request.mockResolvedValue({
         code: true,
-        data: { patients: mockPatients },
+        data: { claims: mockClaims },
         error: [],
       });
 
-      const result = await patientsEndpoint.list({
+      const result = await claimsEndpoint.list({
         location_id: 123,
+        patient_id: 456,
         subdomain: 'test-practice',
       });
 
       expect(mockClient.request).toHaveBeenCalledWith(
         testBaseUrl,
         'GET',
-        '/patients',
-        { params: { location_id: 123, subdomain: 'test-practice' } },
+        '/claims',
+        {
+          params: {
+            location_id: 123,
+            patient_id: 456,
+            subdomain: 'test-practice',
+          },
+        },
       );
-      expect(result).toEqual(mockPatients);
+      expect(result).toEqual(mockClaims);
     });
 
-    it('should return patients from array response', async () => {
-      const mockPatients = [{ id: 1 }];
+    it('should return claims from array response', async () => {
+      const mockClaims = [{ id: 1 }];
       mockClient.request.mockResolvedValue({
         code: true,
-        data: mockPatients,
+        data: mockClaims,
         error: [],
       });
 
-      const result = await patientsEndpoint.list({
+      const result = await claimsEndpoint.list({
         location_id: 123,
+        patient_id: 456,
         subdomain: 'test-practice',
       });
 
-      expect(result).toEqual(mockPatients);
+      expect(result).toEqual(mockClaims);
     });
 
     it('should return empty array for unexpected response', async () => {
@@ -65,8 +73,9 @@ describe('patients endpoint', () => {
         error: [],
       });
 
-      const result = await patientsEndpoint.list({
+      const result = await claimsEndpoint.list({
         location_id: 123,
+        patient_id: 456,
         subdomain: 'test-practice',
       });
 
