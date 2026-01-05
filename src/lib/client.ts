@@ -79,7 +79,8 @@ export const nexhealthClient = (apiKey: string) => {
           `NexHealth authentication failed: ${
             error.response?.data?.description ||
             error.response?.data?.error?.[0] ||
-            error.message
+            error.message ||
+            'Unknown error'
           }`,
           { cause: error },
         );
@@ -167,7 +168,8 @@ export const nexhealthClient = (apiKey: string) => {
           `Request to NexHealth API failed: ${
             error.response?.data?.description ||
             error.response?.data?.error?.[0] ||
-            error.message
+            error.message ||
+            'Unknown error'
           }`,
           { cause: error },
         );
