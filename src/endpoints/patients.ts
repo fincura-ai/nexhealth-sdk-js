@@ -43,7 +43,18 @@ export const patients = (client: NexHealthCoreClient, baseUrl: string) => {
         },
       );
 
-      return response.data;
+      // Handle both wrapped and unwrapped response formats
+      if (response.data?.patients) {
+        return response.data.patients;
+      }
+
+      // New API version may return patients directly in data
+      if (Array.isArray(response.data)) {
+        return response.data as unknown as NexHealthPatient[];
+      }
+
+      // Fallback - return empty if structure is unexpected
+      return [];
     },
   };
 };

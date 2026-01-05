@@ -1,4 +1,8 @@
+import { charges } from './endpoints/charges.js';
+import { claims } from './endpoints/claims.js';
 import { patients } from './endpoints/patients.js';
+import { payments } from './endpoints/payments.js';
+import { paymentTypes } from './endpoints/paymentTypes.js';
 import { nexhealthClient } from './lib/client.js';
 
 export {
@@ -61,11 +65,49 @@ export const createNexHealthClient = (apiKey: string) => {
     isAuthenticated: client.isAuthenticated,
 
     /**
+     * Charge management endpoints.
+     *
+     * Note: Only supported for Dentrix, Dentrix Enterprise, Eaglesoft and Open Dental.
+     *
+     * @see https://docs.nexhealth.com/v20240412/reference/getcharges
+     */
+    charges: charges(client, baseUrl),
+
+    /**
+     * Claims management endpoints.
+     *
+     * Note: Only supported for Dentrix, Dentrix Enterprise, Eaglesoft and Open Dental.
+     *
+     * @see https://docs.nexhealth.com/v20240412/reference/getclaims
+     */
+    claims: claims(client, baseUrl),
+
+    /**
      * Patient management endpoints.
      *
      * @see https://docs.nexhealth.com/reference/getpatients
      */
     patients: patients(client, baseUrl),
+
+    /**
+     * Payment management endpoints.
+     *
+     * Note: Only supported for Dentrix, Dentrix Enterprise, Eaglesoft and Open Dental.
+     *
+     * @see https://docs.nexhealth.com/v20240412/reference/postpayments
+     */
+    payments: payments(client, baseUrl),
+
+    /**
+     * Payment types management endpoints.
+     *
+     * Payment types represent the different methods a practice accepts for payments.
+     *
+     * Note: Only supported for Dentrix, Dentrix Enterprise, Eaglesoft and Open Dental.
+     *
+     * @see https://docs.nexhealth.com/v20240412/reference/getpaymenttypes
+     */
+    paymentTypes: paymentTypes(client, baseUrl),
 
     // Internal references for endpoint implementations
     _baseUrl: baseUrl,

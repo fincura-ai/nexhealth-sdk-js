@@ -18,9 +18,10 @@ export const nexhealthClient = (apiKey: string) => {
    * Uses bearer token if authenticated, otherwise uses API key.
    */
   const getHeaders = (useApiKey = false) => ({
-    Accept: 'application/vnd.Nexhealth+json;version=2',
+    Accept: 'application/json',
     Authorization: useApiKey ? apiKey : `Bearer ${bearerToken}`,
     'Content-Type': 'application/json',
+    'Nex-Api-Version': 'v20240412',
   });
 
   /**
