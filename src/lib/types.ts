@@ -116,6 +116,10 @@ export type NexHealthPatientsQueryParams = {
    */
   location_id: number;
   /**
+   * Fuzzy search across first and last name
+   */
+  name?: string;
+  /**
    * Filter new patients
    */
   new_patient?: boolean;
