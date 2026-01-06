@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v1.1.0](https://github.com/fincura-ai/nexhealth-sdk-js/compare/33ccd84538be8c8275a8f4cf73f0908b27a7c005..v1.1.0) - 2026-01-06
+#### 🌟 Features
+- add missing name param for patients endpoint (#7) - ([33ccd84](https://github.com/fincura-ai/nexhealth-sdk-js/commit/33ccd84538be8c8275a8f4cf73f0908b27a7c005)) - [@louis-lamoureux](https://github.com/louis-lamoureux)
+#### 🐛 Bug Fixes
+- colocate types per modules - ([9e8f528](https://github.com/fincura-ai/nexhealth-sdk-js/commit/9e8f5289f5c7f1dec540f2c8ef8af718729e875d)) - [@sylver](https://github.com/sylver)
+#### 🧹 Miscellaneous Chores
+- **(doc)** update readme - ([d8a7a91](https://github.com/fincura-ai/nexhealth-sdk-js/commit/d8a7a91d30337abb7c4051321655c990aeea0a8d)) - [@sylver](https://github.com/sylver)
+
+- - -
+
 ## [v1.0.1](https://github.com/fincura-ai/nexhealth-sdk-js/compare/aca11ca3f28ea8c9d462ed5a0c338d4e1330658c..v1.0.1) - 2026-01-05
 #### 🐛 Bug Fixes
 - forced to patch because v1.0.0 was already published - ([aca11ca](https://github.com/fincura-ai/nexhealth-sdk-js/commit/aca11ca3f28ea8c9d462ed5a0c338d4e1330658c)) - [@sylver](https://github.com/sylver)
