@@ -13,6 +13,38 @@ export {
 } from './lib/logger.js';
 export * from './lib/types.js';
 
+// Endpoints specific types
+export {
+  type NexHealthCharge,
+  type NexHealthChargesQueryParams,
+  type NexHealthChargesResponse,
+} from './endpoints/charges.js';
+export {
+  type NexHealthClaim,
+  type NexHealthClaimsQueryParams,
+  type NexHealthClaimsResponse,
+  type NexHealthClaimTotals,
+} from './endpoints/claims.js';
+export {
+  type NexHealthPatient,
+  type NexHealthPatientBio,
+  type NexHealthPatientsQueryParams,
+  type NexHealthPatientsResponse,
+} from './endpoints/patients.js';
+export {
+  type NexHealthChargeSplits,
+  type NexHealthPayment,
+  type NexHealthPaymentCreateBody,
+  type NexHealthPaymentCreateParams,
+  type NexHealthPaymentResponse,
+  type NexHealthProviderSplits,
+} from './endpoints/payments.js';
+export {
+  type NexHealthPaymentType,
+  type NexHealthPaymentTypesQueryParams,
+  type NexHealthPaymentTypesResponse,
+} from './endpoints/paymentTypes.js';
+
 /**
  * Create a NexHealth API client.
  *

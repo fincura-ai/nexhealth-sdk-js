@@ -1,9 +1,40 @@
 import { type NexHealthCoreClient } from '../lib/client.js';
-import {
-  type NexHealthPaymentType,
-  type NexHealthPaymentTypesQueryParams,
-  type NexHealthPaymentTypesResponse,
-} from '../lib/types.js';
+import { type NexHealthApiResponse } from '../lib/types.js';
+
+/**
+ * NexHealth Payment Type object
+ *
+ * @see https://docs.nexhealth.com/v20240412/reference/payment-types
+ */
+export type NexHealthPaymentType = {
+  active: boolean;
+  id: number;
+  name: string;
+  updated_at: string;
+};
+
+/**
+ * Query parameters for listing payment types
+ *
+ * @see https://docs.nexhealth.com/v20240412/reference/getpaymenttypes
+ */
+export type NexHealthPaymentTypesQueryParams = {
+  /**
+   * Required: Used to scope the request to the specified location
+   */
+  location_id: number;
+  /**
+   * Required: Used to scope the request to the specified institution
+   */
+  subdomain: string;
+};
+
+/**
+ * Response from GET /payment_types endpoint
+ */
+export type NexHealthPaymentTypesResponse = NexHealthApiResponse<
+  NexHealthPaymentType[]
+>;
 
 /**
  * Create the payment types endpoint handlers.
