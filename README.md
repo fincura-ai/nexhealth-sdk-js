@@ -20,6 +20,12 @@ TypeScript SDK for [NexHealth APIs](https://docs.nexhealth.com/reference/introdu
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [API Reference](#api-reference)
+  - [Authentication](#authentication)
+  - [Patients](#patients)
+  - [Charges](#charges)
+  - [Claims](#claims)
+  - [Payments](#payments)
+  - [Payment Types](#payment-types)
 - [TypeScript Support](#typescript-support)
 - [Logging](#logging)
 - [Contributing](#contributing)
@@ -104,11 +110,13 @@ Retrieve patients for a location.
 | `location_id` | number | ✓ | Location ID |
 | `subdomain` | string | ✓ | Institution subdomain |
 | `id` | number | | Filter by patient ID |
+| `name` | string | | Fuzzy search across first and last name |
 | `first_name` | string | | Filter by first name |
 | `last_name` | string | | Filter by last name |
 | `email` | string | | Filter by email |
 | `phone_number` | string | | Filter by phone |
 | `date_of_birth` | string | | Filter by DOB (YYYY-MM-DD) |
+| `provider_id` | number | | Filter by patient foreign_id from EHR |
 | `new_patient` | boolean | | Filter new patients |
 | `inactive` | boolean | | Filter inactive patients |
 | `since` | string | | Updated since timestamp |
